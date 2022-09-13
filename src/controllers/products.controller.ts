@@ -8,6 +8,13 @@ const createProduct = async (req: Request<unknown, unknown, Iproduct>, res: Resp
   return res.status(201).json(productCreated);
 };
 
+const getAllProducts = async (_req: Request, res: Response) => {
+  const products = await productsService.getAllProducts();
+  return res.status(200).json(products);
+};
+
 export default {
   createProduct,
+  getAllProducts,
+  
 };
