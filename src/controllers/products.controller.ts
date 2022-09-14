@@ -16,5 +16,4 @@ const getAllProducts = async (_req: Request, res: Response) => {
 export default {
   createProduct,
   getAllProducts,
-  
 };
