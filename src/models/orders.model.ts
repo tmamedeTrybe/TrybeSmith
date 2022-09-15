@@ -1,21 +1,46 @@
 import { RowDataPacket } from 'mysql2/promise';
+import Iproduct from '../interfaces/products.interface';
 import connection from './connection';
-import IOrder from '../interfaces/orders.interface';
 
 type OrderData = {
   id: number,
   userId: number,
-  productIds: number,
+  productsIds: number[],
 } & RowDataPacket;
 
-const getAllOrders = async ():Promise<IOrder[]> => {
-  const [result] = await connection.execute<OrderData[]>(
-    `SELECT ord.id, ord.userId, prod.id AS productIds
-    FROM Trybesmith.Orders AS ord
-    INNER JOIN Trybesmith.products AS prod
-    ON ord.id = prod.orderId`,
-  );
-  return result;
+type ProductData = {
+  id: number,
+  name: string,
+  amount: string,
+  orderId?: number
+} & RowDataPacket;
+
+type product = {
+  id: number,
+  name: string,
+  amount: string,
+  orderId?: number
+}
+
+const getAllOrders = async () => {
+  const [orders] = await connection.execute<OrderData[]>('SELECT * FROM Trybesmith.Orders');
+
+  const [products] = await connection.execute<ProductData[]>('SELECT * FROM Trybesmith.Products');
+
+  const ordersWithProducts = orders.map((order) => (
+    {
+      ...order, 
+      productsIds: products.reduce((acc:number[], cur:ProductData):number[] => {
+        if (cur.orderId === order.id) return acc.concat(cur.id)
+        return acc;
+      }, []),
+    }
+  ));
+
+  console.log('produtos', ordersWithProducts[2].productsIds)
+  console.log(ordersWithProducts);
+  
+  return ordersWithProducts;
 };
 
 export default {
